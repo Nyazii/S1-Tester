@@ -1,0 +1,104 @@
+{
+    "name": "mqtt-device-monitor",
+    "productName": "MQTT Device Monitor",
+    "version": "1.0.0",
+    "description": "Professional IoT Device Monitor with MQTT Protocol",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "dev": "electron . --dev",
+        "build": "electron-builder",
+        "build:win": "electron-builder --win",
+        "build:portable": "electron-builder --win portable",
+        "build:installer": "electron-builder --win nsis",
+        "dist": "electron-builder --publish=never"
+    },
+    "keywords": [
+        "mqtt",
+        "iot",
+        "electron",
+        "device-monitor",
+        "real-time",
+        "desktop-app"
+    ],
+    "author": "Marcos Miranda",
+    "license": "MIT",
+    "devDependencies": {
+        "electron": "^27.3.11",
+        "electron-builder": "^24.6.4"
+    },
+    "dependencies": {
+        "mqtt": "^5.0.0"
+    },
+    "build": {
+        "appId": "com.yourname.mqtt-device-monitor",
+        "productName": "MQTT Device Monitor",
+        "copyright": "Copyright © 2025 Marcos Miranda",
+        "directories": {
+            "output": "dist",
+            "buildResources": "assets"
+        },
+        "files": [
+            "main.js",
+            "preload.js",
+            "renderer.js", 
+            "index.html",
+            "styles/**/*",
+            "assets/**/*",
+            "node_modules/**/*",
+            "package.json"
+        ],
+        "extraMetadata": {
+            "security": {
+              "contextIsolation": true,
+              "nodeIntegration": false,
+              "csp": "restrictive"
+            }
+        },
+        "win": {
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": ["x64"]
+                },
+                {
+                    "target": "portable",
+                    "arch": ["x64"]
+                }
+            ],
+            "icon": "assets/icon.ico",
+            "publisherName": "Marcos Miranda",
+            "verifyUpdateCodeSignature": false,
+            "requestedExecutionLevel": "asInvoker"
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false,
+            "allowElevation": true,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "MQTT Monitor",
+            "artifactName": "MQTT-Device-Monitor-Setup-${version}.exe",
+            "installerIcon": "assets/icon.ico",
+            "uninstallerIcon": "assets/icon.ico",
+            "installerHeaderIcon": "assets/icon.ico",
+            "deleteAppDataOnUninstall": true
+        },
+        "portable": {
+            "artifactName": "MQTT-Device-Monitor-${version}-Portable.exe"
+        }
+    },
+    "security": {
+        "advisories": {
+          "enabled": true,
+          "level": "high"
+        },
+          "csp": "default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com;",
+        "electron": {
+          "contextIsolation": true,
+          "nodeIntegration": false,
+          "webSecurity": true
+        }
+    }
+}

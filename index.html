@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S1 DeviceValidator</title>
+    <!--CSP-->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self';
+        style-src 'self' https://cdnjs.cloudflare.com;
+        font-src 'self' https://cdnjs.cloudflare.com;
+        img-src 'self' data:;
+        connect-src 'self';
+    ">
+    
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header com status conexão -->
+        <header class="header">
+            <h1><i class="fas fa-microchip"></i> Validação de Dispositivos S1</h1>
+            <div class="connection-panel">
+                <div class="connection-status" id="connection-status">
+                    <span class="status-indicator online"></span>
+                    Conectado
+                </div>
+            </div>
+        </header>
+
+        <!-- Área principal -->
+        <main class="main-content">
+            <!-- Painel lateral com estatísticas -->
+            <aside class="sidebar">
+                <div class="stats-section">
+                    <h3><i class="fas fa-chart-bar"></i> Estatísticas</h3>
+                    <div class="stat-item">
+                        <span>Total de dispositivos:</span>
+                        <span id="total-devices">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Total validados:</span>
+                        <span id="validated-devices">0</span>
+                    </div>
+                </div>
+                <!-- Lista de dispositivos validados -->
+                <div class="validated-devices-section">
+                    <h3><i class="fas fa-check-circle"></i> Dispositivos Validados</h3>
+                        <div class="export-section">
+                            <button class="export-btn" id="export-validated-btn">
+                                <i class="fas fa-download"></i> Exportar Lista
+                            </button>
+                        </div>
+                    <div class="validated-devices-list" id="validated-devices-list">
+                        <!-- Os dispositivos serão inseridos aqui dinamicamente -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Grid de dispositivos -->
+            <div class="devices-container">
+                <div class="devices-header">
+                    <h2>Dispositivos:</h2>
+                </div>
+                
+                <div class="devices-grid" id="devices-grid">
+                    <!-- Os dispositivos serão inseridos aqui dinamicamente -->
+                    <div class="no-devices">
+                        <i class="fas fa-search"></i>
+                        <p>Aguardando dispositivos se conectarem ao MQTT</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para configurações do dispositivo -->
+    <div class="modal-overlay" id="device-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-device-name">Configurações do dispositivo: </h3>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Conteúdo será inserido dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
