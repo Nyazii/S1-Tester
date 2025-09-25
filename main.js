@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const mqtt = require('mqtt');
 const { dialog } = require('electron');
+const env = require('dotenv').config();
 
 // Configurações de segurança
 app.disableHardwareAcceleration();
@@ -25,7 +26,7 @@ class MQTTManager {
         port: process.env.MQTT_PORT || 1883,
         username: process.env.MQTT_USERNAME,
         password: process.env.MQTT_PASSWORD,
-        protocol: 'mqtt',
+        protocol: 'mqtts',
         connectTimeout: 5000,
         reconnectPeriod: 5000,
         keepalive: 60,
@@ -73,7 +74,7 @@ class MQTTManager {
 
       this.client.on('message', (topic, message, packet) => {
         // Enviar mensagens para o renderer de forma segura
-        if (packet.retain) return;
+        // if (packet.retain) return;
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('mqtt-message', {
             topic: topic,
@@ -177,7 +178,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js') // Script ponte seguro
     },
     show: false,
-    icon: path.join(__dirname, 'assets/app_icon.ico')
+    icon: path.join(__dirname, 'assets/icon.ico')
   });
 
   mainWindow.loadFile('index.html');

@@ -28,6 +28,7 @@
         "electron-builder": "^24.6.4"
     },
     "dependencies": {
+        "dotenv": "^17.2.2",
         "mqtt": "^5.0.0"
     },
     "build": {
@@ -41,7 +42,7 @@
         "files": [
             "main.js",
             "preload.js",
-            "renderer.js", 
+            "renderer.js",
             "index.html",
             "styles/**/*",
             "assets/**/*",
@@ -50,20 +51,24 @@
         ],
         "extraMetadata": {
             "security": {
-              "contextIsolation": true,
-              "nodeIntegration": false,
-              "csp": "restrictive"
+                "contextIsolation": true,
+                "nodeIntegration": false,
+                "csp": "restrictive"
             }
         },
         "win": {
             "target": [
                 {
                     "target": "nsis",
-                    "arch": ["x64"]
+                    "arch": [
+                        "x64"
+                    ]
                 },
                 {
                     "target": "portable",
-                    "arch": ["x64"]
+                    "arch": [
+                        "x64"
+                    ]
                 }
             ],
             "icon": "assets/icon.ico",
@@ -91,14 +96,14 @@
     },
     "security": {
         "advisories": {
-          "enabled": true,
-          "level": "high"
+            "enabled": true,
+            "level": "high"
         },
-          "csp": "default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com;",
+        "csp": "default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com;",
         "electron": {
-          "contextIsolation": true,
-          "nodeIntegration": false,
-          "webSecurity": true
+            "contextIsolation": true,
+            "nodeIntegration": false,
+            "webSecurity": true
         }
     }
 }
