@@ -11,12 +11,12 @@ const getConfig = () => {
   }
   
   return {
-    MQTT_HOST: process.env.MQTT_HOST || '__MQTT_HOST__',
-    MQTT_PORT: parseInt(process.env.MQTT_PORT || '__MQTT_PORT__'),
-    MQTT_USERNAME: process.env.MQTT_USERNAME || '__MQTT_USERNAME__',
-    MQTT_PASSWORD: process.env.MQTT_PASSWORD || '__MQTT_PASSWORD__',
-    WIFI_SSID: process.env.WIFI_SSID || '__WIFI_SSID__',
-    WIFI_PASSWORD: process.env.WIFI_PASSWORD || '__WIFI_PASSWORD__'
+    MQTT_HOST: process.env.MQTT_HOST || 'broker.sirros.io',
+    MQTT_PORT: parseInt(process.env.MQTT_PORT || 8883),
+    MQTT_USERNAME: process.env.MQTT_USERNAME || 'sirros',
+    MQTT_PASSWORD: process.env.MQTT_PASSWORD || 'Sirros_0316sirros',
+    WIFI_SSID: process.env.WIFI_SSID || 'Sirros',
+    WIFI_PASSWORD: process.env.WIFI_PASSWORD || 'casanova2022@'
   };
 };
 
@@ -44,28 +44,19 @@ class MQTTManager {
         username: config.MQTT_USERNAME,
         password: config.MQTT_PASSWORD,
         protocol: 'mqtts',
-        connectTimeout: 5000,
-        reconnectPeriod: 5000,
-        keepalive: 60,
+        connectTimeout: 3000,
+        reconnectPeriod: 3000,
+        keepalive: 10,
         clean: true,
-        reconnectDelayMax: 30000,
+        reconnectDelayMax: 5000,
         rejectUnauthorized: false
       };
 
       this.client = mqtt.connect(mqttOptions);
 
-      // Timeout de segurança
-      const timeout = setTimeout(() => {
-        reject(new Error('TIMEOUT'));
-        if (this.client) {
-          this.client.end(true);
-          this.client = null;
-        }
-      }, 10000);
-
       this.client.on('connect', () => {
-        clearTimeout(timeout);
         this.isConnected = true;
+        mainWindow.webContents.send('mqtt-connected');
         console.log('[MAIN] MQTT conectado');
         
         // Subscribe log
@@ -91,7 +82,7 @@ class MQTTManager {
 
       this.client.on('message', (topic, message, packet) => {
         // Enviar mensagens para o renderer de forma segura
-        // if (packet.retain) return;
+        if (packet.retain) return;
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('mqtt-message', {
             topic: topic,
@@ -101,7 +92,6 @@ class MQTTManager {
       });
 
       this.client.on('error', (err) => {
-        clearTimeout(timeout);
         this.isConnected = false;
         console.error('[MAIN] Erro MQTT:', err.message);
         
@@ -112,11 +102,8 @@ class MQTTManager {
           userMessage = 'Host não encontrado';
         }
         
-        reject(new Error(userMessage));
-        
-        if (this.client) {
-          this.client.end(true);
-          this.client = null;
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('mqtt-disconnected', userMessage);
         }
       });
 
@@ -202,7 +189,6 @@ function createWindow() {
 
   // Verifica se está no modo --dev
   mainWindow.once('ready-to-show', () => {
-    mainWindow.webContents.send('mqtt-connected');
     mainWindow.show();
     if (process.argv.includes('--dev')) {
       console.log('Modo desenvolvimento detectado - abrindo DevTools...');

@@ -61,8 +61,7 @@ body {
 }
 
 .status-indicator.offline {
-    background: #e53e3e;
-    animation: none;
+    background: #e78e09;
 }
 
 @keyframes pulse {

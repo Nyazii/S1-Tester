@@ -110,8 +110,8 @@ class MQTTDeviceS1 {
         });
 
         electronAPI.mqtt.onDisconnected(() => {
-            electronAPI.console.log('Desconectado do broker');
-            this.updateConnectionStatus('Desconectado', 'offline');
+            electronAPI.console.log('Conectando ao broker...');
+            this.updateConnectionStatus('Conectando...', 'offline');
         });
     }
 
