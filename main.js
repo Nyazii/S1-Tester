@@ -1,8 +1,8 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, dialog } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const mqtt = require('mqtt');
-const { dialog } = require('electron');
+const log = require('electron-log');
 
 // Injetando Dados .env
 const getConfig = () => {
@@ -36,7 +36,7 @@ class MQTTManager {
 
   connect() {
     return new Promise((resolve, reject) => {
-      console.log('[MAIN] Iniciando conexao MQTT...');
+      log.info('[MAIN] Iniciando conexao MQTT...');
       
       const mqttOptions = {
         host: config.MQTT_HOST || 'localhost',
@@ -57,25 +57,25 @@ class MQTTManager {
       this.client.on('connect', () => {
         this.isConnected = true;
         mainWindow.webContents.send('mqtt-connected');
-        console.log('[MAIN] MQTT conectado');
+        log.info('[MAIN] MQTT conectado');
         
         // Subscribe log
         this.client.subscribe('/dev/+/register/+/log', (err) => {
           if (err) {
-            console.error('[MAIN] Erro no subscribe:', err);
+            log.error('[MAIN] Erro no subscribe:', err);
             reject(err);
           } else {
-            console.log('[MAIN] Subscribe log realizado');
+            log.info('[MAIN] Subscribe log realizado');
           }
         });
         
         // Subscribe data
         this.client.subscribe('/dev/+/register/+/data/#', (err) => {
           if (err) {
-            console.error('[MAIN] Erro no subscribe:', err);  
+            log.error('[MAIN] Erro no subscribe:', err);  
             reject(err);
           } else {
-            console.log('[MAIN] Subscribe data realizado');
+            log.info('[MAIN] Subscribe data realizado');
           }
         });
       });
@@ -93,7 +93,7 @@ class MQTTManager {
 
       this.client.on('error', (err) => {
         this.isConnected = false;
-        console.error('[MAIN] Erro MQTT:', err.message);
+        log.error('[MAIN] Erro MQTT:', err.message);
         
         let userMessage = 'Erro de conexao';
         if (err.code === 'ECONNREFUSED') {
@@ -109,7 +109,7 @@ class MQTTManager {
 
       this.client.on('close', () => {
         this.isConnected = false;
-        console.log('[MAIN] Conexao MQTT fechada');
+        log.info('[MAIN] Conexao MQTT fechada');
         
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('mqtt-disconnected');
@@ -121,7 +121,7 @@ class MQTTManager {
 
   disconnect() {
     return new Promise((resolve) => {
-      console.log('[MAIN] Desconectando MQTT...');
+      log.info('[MAIN] Desconectando MQTT...');
       
       if (this.client) {
         this.client.removeAllListeners();
@@ -191,14 +191,13 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     if (process.argv.includes('--dev')) {
-      console.log('Modo desenvolvimento detectado - abrindo DevTools...');
+      log.info('Modo desenvolvimento detectado - abrindo DevTools...');
       mainWindow.webContents.openDevTools();
     } else {
       Menu.setApplicationMenu(null);
     }
     
-    // Log do caminho do banco de dados para debug
-    console.log('[MAIN] Caminho do banco de dados:', dbPath);
+    log.info('[MAIN] Caminho do banco de dados:', dbPath);
   });
 
   mainWindow.on('closed', () => {
@@ -214,7 +213,7 @@ function loadDevices() {
             if (raw.trim() === '') return [];
             return JSON.parse(raw);
         } catch (err) {
-            console.error('[MAIN] Erro ao carregar devices:', err);
+            log.error('[MAIN] Erro ao carregar devices:', err);
             return [];
         }
     }
@@ -229,10 +228,10 @@ function saveDevices(devices) {
             fs.mkdirSync(dataDir, { recursive: true });
         }
         fs.writeFileSync(dbPath, JSON.stringify(devices, null, 2), 'utf-8');
-        console.log(`[MAIN] Devices salvos em: ${dbPath}`);
+        log.info(`[MAIN] Devices salvos em: ${dbPath}`);
         return true;
     } catch (err) {
-        console.error('[MAIN] Erro ao salvar devices:', err);
+        log.error('[MAIN] Erro ao salvar devices:', err);
         return false;
     }
 }
@@ -322,10 +321,10 @@ ipcMain.handle('dbsave', async (event, device) => {
           devices.push(device);
           const saved = saveDevices(devices);
           if (saved) {
-              console.log(`[MAIN] Dispositivo ${device.id} salvo.`);
+              log.info(`[MAIN] Dispositivo ${device.id} salvo.`);
               return { success: true };
           } else {
-              console.error(`[MAIN] Erro ao salvar dispositivo ${device.id}`);
+              log.error(`[MAIN] Erro ao salvar dispositivo ${device.id}`);
               return { success: false, error: 'Erro ao salvar no banco de dados' };
           }
       }
@@ -343,10 +342,10 @@ ipcMain.handle('remove-device', async (event, deviceId) => {
   const saved = saveDevices(updatedDevices);
   
   if (saved) {
-      console.log(`[MAIN] Dispositivo ${deviceId} removido do banco.`);
+      log.info(`[MAIN] Dispositivo ${deviceId} removido do banco.`);
       return { success: true };
   } else {
-      console.error(`[MAIN] Erro ao remover dispositivo ${deviceId}`);
+      log.error(`[MAIN] Erro ao remover dispositivo ${deviceId}`);
       return { success: false, error: 'Erro ao atualizar banco de dados' };
   }
 });
@@ -373,16 +372,25 @@ app.on('activate', () => {
           mqttManager.connect().then(() => {
             isConnected = true;
           }).catch(error => {
-            console.log('[MAIN] Erro ao reconectar:', error.message);
+            log.info('[MAIN] Erro ao reconectar:', error.message);
           });
         }  }
 });
 
+// Captura de logs Renderer
+ipcMain.on('log-info', (event, msg) => {
+  log.info(`[Renderer] ${msg}`);
+});
+
+ipcMain.on('log-error', (event, msg) => {
+  log.error(`[Renderer] ${msg}`);
+});
+
 // Tratamento de erros não capturados
 process.on('uncaughtException', (error) => {
-  console.error('[MAIN] Erro não tratado:', error);
+  log.error('[MAIN] Erro não tratado:', error);
 });
 
 process.on('unhandledRejection', (reason) => {
-  console.error('[MAIN] Promise rejeitada:', reason);
+  log.error('[MAIN] Promise rejeitada:', reason);
 });

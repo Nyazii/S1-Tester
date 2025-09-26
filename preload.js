@@ -46,21 +46,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   
   // Console seguro para debug
-  console: {
-    log: (...args) => console.log('[RENDERER]', ...args),
-    error: (...args) => console.error('[RENDERER]', ...args),
-    warn: (...args) => console.warn('[RENDERER]', ...args)
+  logger: {
+    info: (msg) => ipcRenderer.send('log-info', msg),
+    error: (msg) => ipcRenderer.send('log-error', msg)
   }
 });
-
-//VALIDAÇÃO DE SEGURANÇA
-console.log('Preload script carregado com seguranca');
-console.log('Context isolation:', process.contextIsolated);
-console.log('Node integration:', process.env.NODE_INTEGRATION);
-
-// Listener para debug (removível em produção)
-if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-  window.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM carregado com seguranca');
-  });
-}

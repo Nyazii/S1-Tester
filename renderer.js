@@ -15,7 +15,7 @@ class MQTTDeviceS1 {
         this.loadValidatedDevices();
 
         setInterval(() => this.refreshDevices(), 30000);// Verifica os devices online
-        electronAPI.console.log('Monitor iniciado');
+        electronAPI.logger.info('Monitor iniciado');
     }
 
     initializeUI() {
@@ -100,17 +100,17 @@ class MQTTDeviceS1 {
 
     setupMQTTListeners() {
         electronAPI.mqtt.onConnected(() => {
-            electronAPI.console.log('Conectado ao broker')
+            electronAPI.logger.info('Conectado ao broker')
             this,this.updateConnectionStatus('Conectado', 'online');
         })
         
         electronAPI.mqtt.onMessage((data) => {
-            electronAPI.console.log('Mensagem recebida:', data);
+            electronAPI.logger.info('Mensagem recebida:', data);
             this.handleMessage(data.topic, data.message);
         });
 
         electronAPI.mqtt.onDisconnected(() => {
-            electronAPI.console.log('Conectando ao broker...');
+            electronAPI.logger.info('Conectando ao broker...');
             this.updateConnectionStatus('Conectando...', 'offline');
         });
     }
@@ -186,7 +186,7 @@ class MQTTDeviceS1 {
                 }, 1000);
                 this.portTimeouts.set(key, timeout);
                 
-                electronAPI.console.log(`Dispositivo ${deviceId}, Porta ${port} Validada`);
+                electronAPI.logger.info(`Dispositivo ${deviceId}, Porta ${port} Validada`);
             }
         }
         this.renderDevices();
@@ -198,12 +198,12 @@ class MQTTDeviceS1 {
             // Enviar para o main o Device e a info da porta
             const result = await electronAPI.mqtt.publish(deviceId, activePort);         
             if (result.success) {
-                electronAPI.console.log(`Comando enviado para ${deviceId}: ${activePort ? 'Ativar' : 'Desativar'} portas`);
+                electronAPI.logger.info(`Comando enviado para ${deviceId}: ${activePort ? 'Ativar' : 'Desativar'} portas`);
             } else {
                 throw new Error('Falha no envio MQTT');
             }
         } catch (error) {
-            electronAPI.console.error('Erro ao enviar comando:', error);
+            electronAPI.logger.error('Erro ao enviar comando:', error);
             alert('Erro ao enviar comando para o dispositivo!');
         }
     }
@@ -222,14 +222,14 @@ class MQTTDeviceS1 {
         try{
             await electronAPI.app.dbSave(device);
         } catch (error){
-            electronAPI.console.error('Erro ao salvar device:', error);
+            electronAPI.logger.error('Erro ao salvar device:', error);
         }
 
         this.loadValidatedDevices();
         this.devices.delete(deviceId);
         this.renderDevices();
         this.updateStats();
-        console.log(`Dispositivo ${deviceId} validado`);
+        electronAPI.logger.info(`Dispositivo ${deviceId} validado`);
     }
 
     async exportValidatedDevices() {
@@ -249,7 +249,7 @@ class MQTTDeviceS1 {
                 throw new Error(result.error || 'Erro desconhecido');
             }
         } catch (error) {
-            electronAPI.console.error('Erro ao exportar:', error);
+            electronAPI.logger.error('Erro ao exportar:', error);
             alert('Erro ao exportar a lista!');
         }
     }
@@ -264,9 +264,9 @@ class MQTTDeviceS1 {
                 });
             });
             this.renderValidatedDevices();
-            electronAPI.console.log(`${devices.length} dispositivos validados carregados`);
+            electronAPI.logger.info(`${devices.length} dispositivos validados carregados`);
         } catch (error) {
-            electronAPI.console.error('Erro ao carregar dispositivos:', error);
+            electronAPI.logger.error('Erro ao carregar dispositivos:', error);
         }
     }
 
@@ -276,9 +276,9 @@ class MQTTDeviceS1 {
             this.validatedDevices.delete(deviceId);
             this.renderValidatedDevices();
             this.updateStats();
-            electronAPI.console.log(`Dispositivo ${deviceId} desvalidado`);
+            electronAPI.logger.info(`Dispositivo ${deviceId} desvalidado`);
         } catch (error) {
-            electronAPI.console.error('Erro ao remover dispositivo:', error);
+            electronAPI.logger.error('Erro ao remover dispositivo:', error);
         }
     }
 
@@ -462,10 +462,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Info da versão
         const version = await electronAPI.app.getVersion();
-        electronAPI.console.log(`v${version}`);
+        electronAPI.logger.info(`v${version}`);
         
     } catch (error) {
-        console.error('Falha na inicialização:', error);
+        electronAPI.logger.error('Falha na inicialização:', error);
         document.body.innerHTML = `
             <div style="text-align: center; padding: 2rem; color: red;">
                 <h1>Erro de Seguranca</h1>

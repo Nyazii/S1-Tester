@@ -1,14 +1,14 @@
 {
-    "name": "mqtt-device-monitor",
-    "productName": "MQTT Device Monitor",
-    "version": "1.0.0",
+    "name": "s1_devicevalidator",
+    "productName": "Validacao de Dispositivos S1",
+    "version": "1.1.0",
     "description": "Professional IoT Device Monitor with MQTT Protocol",
     "main": "main.js",
     "scripts": {
         "start": "electron .",
         "dev": "electron . --dev",
         "prebuild": "node build-inject.js inject",
-        "postbuild": "node build-inject.js restore", 
+        "postbuild": "node build-inject.js restore",
         "clean": "node build-inject.js restore",
         "build": "electron-builder",
         "build:win": "electron-builder --win",
@@ -32,11 +32,12 @@
     },
     "dependencies": {
         "dotenv": "^17.2.2",
+        "electron-log": "^5.4.3",
         "mqtt": "^5.0.0"
     },
     "build": {
-        "appId": "com.yourname.mqtt-device-monitor",
-        "productName": "MQTT Device Monitor",
+        "appId": "com.MarcosMiranda.s1_devicevalidator",
+        "productName": "Validacao de Dispositivos S1",
         "copyright": "Copyright © 2025 Marcos Miranda",
         "directories": {
             "output": "dist",
@@ -52,7 +53,7 @@
             "node_modules/**/*",
             "package.json",
             "!.env",
-            "!build-inject.js", 
+            "!build-inject.js",
             "!*.backup",
             "!README.md"
         ],
