@@ -7,6 +7,9 @@
     "scripts": {
         "start": "electron .",
         "dev": "electron . --dev",
+        "prebuild": "node build-inject.js inject",
+        "postbuild": "node build-inject.js restore", 
+        "clean": "node build-inject.js restore",
         "build": "electron-builder",
         "build:win": "electron-builder --win",
         "build:portable": "electron-builder --win portable",
@@ -47,7 +50,11 @@
             "styles/**/*",
             "assets/**/*",
             "node_modules/**/*",
-            "package.json"
+            "package.json",
+            "!.env",
+            "!build-inject.js", 
+            "!*.backup",
+            "!README.md"
         ],
         "extraMetadata": {
             "security": {

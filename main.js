@@ -3,7 +3,24 @@ const fs = require('fs');
 const path = require('path');
 const mqtt = require('mqtt');
 const { dialog } = require('electron');
-const env = require('dotenv').config();
+
+// Injetando Dados .env
+const getConfig = () => {
+  if (process.env.NODE_ENV !== 'production' && !process.resourcesPath) {
+    require('dotenv').config();
+  }
+  
+  return {
+    MQTT_HOST: process.env.MQTT_HOST || '__MQTT_HOST__',
+    MQTT_PORT: parseInt(process.env.MQTT_PORT || '__MQTT_PORT__'),
+    MQTT_USERNAME: process.env.MQTT_USERNAME || '__MQTT_USERNAME__',
+    MQTT_PASSWORD: process.env.MQTT_PASSWORD || '__MQTT_PASSWORD__',
+    WIFI_SSID: process.env.WIFI_SSID || '__WIFI_SSID__',
+    WIFI_PASSWORD: process.env.WIFI_PASSWORD || '__WIFI_PASSWORD__'
+  };
+};
+
+const config = getConfig();
 
 // Configurações de segurança
 app.disableHardwareAcceleration();
@@ -22,10 +39,10 @@ class MQTTManager {
       console.log('[MAIN] Iniciando conexao MQTT...');
       
       const mqttOptions = {
-        host: process.env.MQTT_HOST || 'localhost',
-        port: process.env.MQTT_PORT || 1883,
-        username: process.env.MQTT_USERNAME,
-        password: process.env.MQTT_PASSWORD,
+        host: config.MQTT_HOST || 'localhost',
+        port: config.MQTT_PORT || 1883,
+        username: config.MQTT_USERNAME,
+        password: config.MQTT_PASSWORD,
         protocol: 'mqtts',
         connectTimeout: 5000,
         reconnectPeriod: 5000,
@@ -240,8 +257,8 @@ ipcMain.handle('mqtt-publish', async (event, topic, message) => {
   message = +message; // false -> 0 / true -> 1
   const configData = {
             wifi: {
-                ssid: process.env.WIFI_SSID || "DefaultNetwork",
-                senha: process.env.WIFI_PASSWORD || "",
+                ssid: config.WIFI_SSID || "DefaultNetwork",
+                senha: config.WIFI_PASSWORD || "",
                 device_password: "",
                 timezone: -3,
                 ap: 2,
@@ -251,11 +268,11 @@ ipcMain.handle('mqtt-publish', async (event, topic, message) => {
                 painel: false,
                 id: topic,
                 nome: topic,
-                porta: process.env.MQTT_PORT || 1883,
+                porta: config.MQTT_PORT || 1883,
                 client_id: "device/register",
-                broker: process.env.MQTT_HOST || "localhost",
-                usuario: process.env.MQTT_USERNAME || "",
-                password: process.env.MQTT_PASSWORD || ""
+                broker: config.MQTT_HOST || "localhost",
+                usuario: config.MQTT_USERNAME || "",
+                password: config.MQTT_PASSWORD || ""
             },
             pins: {
                 p1: message,

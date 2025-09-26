@@ -99,6 +99,11 @@ git clone [repository-url]
 # Instalar dependências
 npm install
 
+# Crie um arquivo .env na raiz do projeto com base no .env.example
+
+# Injetar variáveis no main.js
+npm run prebuild
+
 # Executar em modo desenvolvimento
 npm run dev
 
@@ -109,18 +114,23 @@ npm run build
 ### Scripts Disponíveis
 ```json
 {
-  "start": "electron .",
-  "dev": "electron . --dev",
-  "build": "electron-builder",
-  "build:win": "electron-builder --win",
-  "build:portable": "electron-builder --win portable"
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "prebuild": "node build-inject.js inject",
+    "postbuild": "node build-inject.js restore", 
+    "clean": "node build-inject.js restore",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:portable": "electron-builder --win portable",
+    "build:installer": "electron-builder --win nsis",
+    "dist": "electron-builder --publish=never"
 }
 ```
 
 ## 📁 Estrutura do Projeto
 
 ```
-mqtt-device-monitor/
+S1-TESTER/
 ├── main.js              # Processo principal Electron
 ├── renderer.js          # Lógica do frontend
 ├── preload.js           # Bridge de segurança
@@ -130,7 +140,9 @@ mqtt-device-monitor/
 ├── assets/              # Recursos estáticos
 │   └── icons/
 ├── package.json         # Configurações do projeto
-└── README.md           # Documentação
+├── .env.example         # Exemplo configuuração MQTT
+├── build-inject.js      # Injeta variáveis no main.js
+└── README.md            # Documentação
 ```
 
 ## 🎯 Conceitos Demonstrados
